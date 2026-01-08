@@ -4,17 +4,11 @@
   <title>Laundry Safe</title>
   <style>
     body { font-family: Arial; text-align:center; background:#eef2f7; }
-    .card {
-      display:inline-block; padding:30px; margin:20px;
-      background:white; border-radius:10px;
-      box-shadow:0 4px 8px rgba(0,0,0,0.1);
-    }
-    a { text-decoration:none; color:white; }
     button {
-      padding:15px 25px; border:none;
-      background:#2c7be5; color:white;
-      border-radius:8px; cursor:pointer;
-      font-size:16px;
+      padding:15px 25px; margin:20px;
+      border:none; background:#2c7be5;
+      color:white; border-radius:8px;
+      font-size:16px; cursor:pointer;
     }
   </style>
 </head>
@@ -22,15 +16,9 @@
 
 <h1>Laundry Mix-Up Prevention System</h1>
 
-<div class="card">
-  <h2>Student</h2>
-  <a href="student.html"><button>Scan QR / Enter</button></a>
-</div>
-
-<div class="card">
-  <h2>Laundry Manager</h2>
-  <a href="manager.html"><button>Manager Login</button></a>
-</div>
+<button onclick="location.href='student.html'">Student (Scan QR)</button>
+<button onclick="location.href='manager.html'">Laundry Manager</button>
 
 </body>
 </html>
+
