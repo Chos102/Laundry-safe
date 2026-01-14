@@ -10,10 +10,12 @@
       background: linear-gradient(120deg, #4facfe, #00f2fe);
       padding: 20px;
     }
+
     h2 {
       text-align: center;
       color: white;
     }
+
     .card {
       background: white;
       max-width: 420px;
@@ -22,6 +24,7 @@
       border-radius: 10px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
+
     input, textarea {
       width: 100%;
       padding: 10px;
@@ -29,9 +32,11 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
+
     textarea {
       resize: none;
     }
+
     button {
       width: 100%;
       padding: 12px;
@@ -43,18 +48,30 @@
       cursor: pointer;
       font-size: 15px;
     }
+
     button:hover {
       background: #218838;
     }
+
+    .scan-btn {
+      background: #007bff;
+    }
+
+    .scan-btn:hover {
+      background: #0069d9;
+    }
+
     #reader {
       margin-top: 15px;
       width: 100%;
     }
-    .scan-btn {
-      background: #007bff;
-    }
-    .scan-btn:hover {
-      background: #0069d9;
+
+    .status-box {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8f9fa;
+      border-left: 5px solid #17a2b8;
     }
   </style>
 </head>
@@ -63,6 +80,7 @@
 <h2>🧺 Student Laundry Dashboard</h2>
 
 <div class="card">
+
   <button class="scan-btn" onclick="startScan()">📷 Scan Bag QR</button>
   <div id="reader"></div>
 
@@ -73,6 +91,13 @@
   <textarea id="clothes" rows="3" placeholder="Clothes Details"></textarea>
 
   <button onclick="submitLaundry()">Submit Laundry</button>
+
+  <hr style="margin:20px 0">
+
+  <h3>📦 Laundry Status</h3>
+  <button onclick="checkStatus()">Check My Laundry Status</button>
+
+  <div id="statusBox" class="status-box"></div>
 </div>
 
 <script>
@@ -80,6 +105,7 @@
 
   function startScan() {
     if (qrScanner) return;
+
     qrScanner = new Html5Qrcode("reader");
     qrScanner.start(
       { facingMode: "environment" },
@@ -124,7 +150,38 @@
 
     alert("Laundry Submitted Successfully 🧺✅");
 
-    name.value = room.value = address.value = bag.value = clothes.value = "";
+    name.value = room.value = address.value = clothes.value = "";
+  }
+
+  function checkStatus() {
+    const bagNo = document.getElementById("bag").value;
+    const box = document.getElementById("statusBox");
+
+    if (!bagNo) {
+      alert("Please scan your bag QR first ❌");
+      return;
+    }
+
+    const data = JSON.parse(localStorage.getItem("laundryData")) || [];
+    const record = data.find(item => item.bag === bagNo);
+
+    if (!record) {
+      box.innerHTML = "❌ No laundry record found.";
+      return;
+    }
+
+    if (record.status === "Ready for Pickup") {
+      box.innerHTML = `
+        <p><b>Status:</b> ${record.status}</p>
+        <p><b>Pickup Date:</b> ${record.pickupDate}</p>
+        <p><b>Pickup Time:</b> ${record.pickupSlot}</p>
+      `;
+    } else {
+      box.innerHTML = `
+        <p><b>Status:</b> ${record.status}</p>
+        <p>⏳ Waiting for manager verification</p>
+      `;
+    }
   }
 </script>
 
