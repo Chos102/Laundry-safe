@@ -141,70 +141,67 @@
 
   /* LOAD REQUESTS */
   function loadRequests() {
-    const data = JSON.parse(localStorage.getItem("laundryData")) || [];
-    const box = document.getElementById("requests");
-    box.innerHTML = "";
+  const data = JSON.parse(localStorage.getItem("laundryData")) || [];
+  const box = document.getElementById("requests");
+  box.innerHTML = "";
 
-    if (data.length === 0) {
-      box.innerHTML = "<p>No requests yet.</p>";
-      return;
-    }
-
-    data.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "card " + (item.status === "Ready for Pickup" ? "ready" : "pending");
-
-      div.innerHTML = `
-        <p><b>Name:</b> ${item.name}</p>
-        <p><b>Room:</b> ${item.room}</p>
-        <p><b>Bag:</b> ${item.bag}</p>
-        <p><b>Clothes:</b> ${item.clothes}</p>
-        <p><b>Status:</b> ${item.status}</p>
-
-        ${item.status === "Pending" ? `
-          <input type="date" id="date-${item.id}">
-          <select id="slot-${item.id}">
-            <option value="">Select Time Slot</option>
-            <option>10:00 – 11:00</option>
-            <option>11:00 – 12:00</option>
-            <option>14:00 – 15:00</option>
-            <option>15:00 – 16:00</option>
-          </select>
-          <button onclick="verify(${item.id})">Verify & Assign</button>
-        ` : `
-          <p><b>Pickup:</b> ${item.pickupDate || ""} (${item.pickupSlot || ""})</p>
-        `}
-      `;
-
-      box.appendChild(div);
-    });
+  if (data.length === 0) {
+    box.innerHTML = "<p>No requests yet.</p>";
+    return;
   }
+
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <p><b>Name:</b> ${item.name || "N/A"}</p>
+      <p><b>Room:</b> ${item.room || "N/A"}</p>
+      <p><b>Bag:</b> ${item.bag || "N/A"}</p>
+      <p><b>Clothes:</b> ${item.clothes || "N/A"}</p>
+      <p><b>Status:</b> ${item.status || "Pending"}</p>
+
+      ${
+        item.status === "Pending"
+          ? `
+            <input type="date" id="date-${item.id}">
+            <input type="time" id="time-${item.id}">
+            <button onclick="verify(${item.id})">Verify & Assign</button>
+          `
+          : `<p><b>Pickup:</b> ${item.pickup || "Not assigned yet"}</p>`
+      }
+    `;
+
+    box.appendChild(div);
+  });
+}
+
 
   /* VERIFY */
-  function verify(id) {
-    let data = JSON.parse(localStorage.getItem("laundryData"));
+ function verify(id) {
+  let data = JSON.parse(localStorage.getItem("laundryData")) || [];
 
-    const date = document.getElementById(`date-${id}`).value;
-    const slot = document.getElementById(`slot-${id}`).value;
+  const date = document.getElementById(`date-${id}`).value;
+  const time = document.getElementById(`time-${id}`).value;
 
-    if (!date || !slot) {
-      alert("Select pickup date & time");
-      return;
-    }
-
-    data = data.map(item => {
-      if (item.id === id) {
-        item.status = "Ready for Pickup";
-        item.pickupDate = date;
-        item.pickupSlot = slot;
-      }
-      return item;
-    });
-
-    localStorage.setItem("laundryData", JSON.stringify(data));
-    loadRequests();
-    alert("Laundry verified & scheduled ✅");
+  if (!date || !time) {
+    alert("Select pickup date & time ❌");
+    return;
   }
+
+  data = data.map(item => {
+    if (item.id === id) {
+      item.status = "Ready for Pickup";
+      item.pickup = `${date} ${time}`;
+    }
+    return item;
+  });
+
+  localStorage.setItem("laundryData", JSON.stringify(data));
+  loadRequests();
+  alert("Laundry verified & scheduled ✅");
+}
+
 </script>
 
 </body>
