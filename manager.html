@@ -1,110 +1,89 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Manager Panel</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <title>Laundry Manager Panel</title>
 
   <style>
-    body { font-family: Arial; background:#eef2f7; }
-    .box {
-      background:white; padding:20px;
-      margin:20px; border-radius:8px;
+    body {
+      font-family: Arial;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .pending {
+      border-left: 5px solid orange;
+    }
+    .verified {
+      border-left: 5px solid green;
     }
     button {
-      padding:10px 15px;
-      background:#28a745;
-      color:white;
-      border:none;
-      border-radius:5px;
-      cursor:pointer;
-      margin-right:8px;
+      padding: 8px 12px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 8px;
     }
-    #reader, #qrcode {
-      width:300px;
-      margin-top:15px;
+    button:hover {
+      background: #218838;
     }
   </style>
 </head>
 <body>
 
-<h2>Laundry Manager Dashboard</h2>
+<h2>🧺 Laundry Manager Dashboard</h2>
 
-<!-- SCANNER SECTION -->
-<div class="box">
-  <h3>Scan Laundry Bag QR</h3>
-  <button onclick="startScan()">Open Camera</button>
-  <button onclick="stopScan()">Close Camera</button>
-
-  <div id="reader"></div>
-
-  <p><b>Scanned Bag No:</b> <span id="bagNo">---</span></p>
-</div>
-
-<!-- QR GENERATOR -->
-<div class="box">
-  <h3>Generate Bag QR</h3>
-  <input id="bagInput" placeholder="Enter Bag Number">
-  <button onclick="generateQR()">Generate QR</button>
-  <div id="qrcode"></div>
-</div>
-
-<!-- REQUEST -->
-<div class="box">
-  <h3>Student Laundry Request</h3>
-  <p>Name: Rahul</p>
-  <p>Bag No: <b>12</b></p>
-  <p>Clothes: 2 shirts, 1 jeans</p>
-  <button onclick="verify()">Verify</button>
-</div>
+<div id="requests"></div>
 
 <script>
-  let qrScanner = null;
-  let scannedBag = "";
+  function loadRequests() {
+    const data = JSON.parse(localStorage.getItem("laundryData")) || [];
+    const box = document.getElementById("requests");
+    box.innerHTML = "";
 
-  function startScan() {
-    if (qrScanner) return;
-
-    qrScanner = new Html5Qrcode("reader");
-    qrScanner.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      qrText => {
-        scannedBag = qrText;
-        document.getElementById("bagNo").innerText = qrText;
-        alert("QR Scanned Successfully");
-        stopScan();
-      }
-    );
-  }
-
-  function stopScan() {
-    if (qrScanner) {
-      qrScanner.stop().then(() => {
-        qrScanner.clear();
-        qrScanner = null;
-        document.getElementById("reader").innerHTML = "";
-      });
-    }
-  }
-
-  function generateQR() {
-    const bag = document.getElementById("bagInput").value;
-    if (!bag) {
-      alert("Enter bag number");
+    if (data.length === 0) {
+      box.innerHTML = "<p>No laundry requests yet.</p>";
       return;
     }
-    document.getElementById("qrcode").innerHTML = "";
-    new QRCode(document.getElementById("qrcode"), bag);
+
+    data.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "card " + (item.status === "Verified" ? "verified" : "pending");
+
+      div.innerHTML = `
+        <p><b>Name:</b> ${item.name}</p>
+        <p><b>Room:</b> ${item.room}</p>
+        <p><b>Bag:</b> ${item.bag}</p>
+        <p><b>Clothes:</b> ${item.clothes}</p>
+        <p><b>Status:</b> ${item.status}</p>
+        ${item.status === "Pending" ? `<button onclick="verify(${item.id})">Verify</button>` : ""}
+      `;
+      box.appendChild(div);
+    });
   }
 
-  function verify() {
-    if (!scannedBag) {
-      alert("Please scan a bag QR first");
-    } else {
-      alert("Bag " + scannedBag + " verified successfully ✔️");
-    }
+  function verify(id) {
+    let data = JSON.parse(localStorage.getItem("laundryData"));
+    data = data.map(item => {
+      if (item.id === id) item.status = "Verified";
+      return item;
+    });
+    localStorage.setItem("laundryData", JSON.stringify(data));
+    loadRequests();
+    alert("Laundry Verified ✅");
   }
+
+  loadRequests();
 </script>
 
 </body>
