@@ -8,23 +8,34 @@ function saveData(data) {
 
 /* STUDENT SUBMIT */
 function submitLaundry() {
-  if (!bag.value) {
+  const nameInput = document.getElementById("name");
+  const roomInput = document.getElementById("room");
+  const addressInput = document.getElementById("address");
+  const bagInput = document.getElementById("bag");
+  const clothesInput = document.getElementById("clothes");
+
+  if (!bagInput.value) {
     alert("Please scan the bag QR first ❌");
     return;
   }
 
-  if (!name.value || !room.value || !address.value || !clothes.value) {
+  if (
+    !nameInput.value ||
+    !roomInput.value ||
+    !addressInput.value ||
+    !clothesInput.value
+  ) {
     alert("Please fill all details ❌");
     return;
   }
 
   const entry = {
     id: Date.now(),
-    name: name.value,
-    room: room.value,
-    address: address.value,
-    bag: bag.value,
-    clothes: clothes.value,
+    name: nameInput.value,
+    room: roomInput.value,
+    address: addressInput.value,
+    bag: bagInput.value,
+    clothes: clothesInput.value,
     status: "Pending",
     pickup: ""
   };
@@ -35,7 +46,11 @@ function submitLaundry() {
 
   alert("Laundry Submitted Successfully 🧺✅");
 
-  name.value = room.value = address.value = clothes.value = "";
+  nameInput.value =
+    roomInput.value =
+    addressInput.value =
+    clothesInput.value =
+      "";
 }
 
 /* STUDENT STATUS */
