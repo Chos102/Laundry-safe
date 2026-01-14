@@ -3,6 +3,8 @@
 <head>
   <title>Manager Panel</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
   <style>
     body { font-family: Arial; background:#eef2f7; }
     .box {
@@ -16,8 +18,9 @@
       border:none;
       border-radius:5px;
       cursor:pointer;
+      margin-right:8px;
     }
-    #reader {
+    #reader, #qrcode {
       width:300px;
       margin-top:15px;
     }
@@ -27,13 +30,26 @@
 
 <h2>Laundry Manager Dashboard</h2>
 
+<!-- SCANNER SECTION -->
 <div class="box">
   <h3>Scan Laundry Bag QR</h3>
   <button onclick="startScan()">Open Camera</button>
+  <button onclick="stopScan()">Close Camera</button>
+
   <div id="reader"></div>
+
   <p><b>Scanned Bag No:</b> <span id="bagNo">---</span></p>
 </div>
 
+<!-- QR GENERATOR -->
+<div class="box">
+  <h3>Generate Bag QR</h3>
+  <input id="bagInput" placeholder="Enter Bag Number">
+  <button onclick="generateQR()">Generate QR</button>
+  <div id="qrcode"></div>
+</div>
+
+<!-- REQUEST -->
 <div class="box">
   <h3>Student Laundry Request</h3>
   <p>Name: Rahul</p>
@@ -42,34 +58,48 @@
   <button onclick="verify()">Verify</button>
 </div>
 
-<div class="box">
-  <h3>Update Pickup Time</h3>
-  <input type="date">
-  <input type="time">
-  <button>Notify Student</button>
-</div>
-
 <script>
+  let qrScanner = null;
   let scannedBag = "";
 
   function startScan() {
-    const qr = new Html5Qrcode("reader");
+    if (qrScanner) return;
 
-    qr.start(
+    qrScanner = new Html5Qrcode("reader");
+    qrScanner.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       qrText => {
         scannedBag = qrText;
         document.getElementById("bagNo").innerText = qrText;
         alert("QR Scanned Successfully");
-        qr.stop();
-      },
-      error => {}
+        stopScan();
+      }
     );
   }
 
+  function stopScan() {
+    if (qrScanner) {
+      qrScanner.stop().then(() => {
+        qrScanner.clear();
+        qrScanner = null;
+        document.getElementById("reader").innerHTML = "";
+      });
+    }
+  }
+
+  function generateQR() {
+    const bag = document.getElementById("bagInput").value;
+    if (!bag) {
+      alert("Enter bag number");
+      return;
+    }
+    document.getElementById("qrcode").innerHTML = "";
+    new QRCode(document.getElementById("qrcode"), bag);
+  }
+
   function verify() {
-    if (scannedBag === "") {
+    if (!scannedBag) {
       alert("Please scan a bag QR first");
     } else {
       alert("Bag " + scannedBag + " verified successfully ✔️");
