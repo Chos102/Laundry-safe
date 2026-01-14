@@ -3,62 +3,156 @@
 <head>
   <title>Laundry Manager Panel</title>
 
+  <!-- QR Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
     body {
-      font-family: Arial;
-      background: #f0f2f5;
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
       padding: 20px;
     }
+
     h2 {
       text-align: center;
     }
-    .card {
+
+    .login-box, .dashboard {
+      max-width: 500px;
+      margin: auto;
       background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px;
+      margin-top: 12px;
+      width: 100%;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .card {
+      background: #fff;
       padding: 15px;
-      margin-bottom: 12px;
+      margin-top: 15px;
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .pending {
-      border-left: 5px solid orange;
+
+    .pending { border-left: 5px solid orange; }
+    .ready { border-left: 5px solid green; }
+
+    .logout {
+      background: #dc3545;
     }
-    .verified {
-      border-left: 5px solid green;
-    }
-    button {
-      padding: 8px 12px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-    button:hover {
-      background: #218838;
+
+    #qrBox {
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-<h2>🧺 Laundry Manager Dashboard</h2>
+<h2>🧺 Laundry Manager Panel</h2>
 
-<div id="requests"></div>
+<!-- LOGIN -->
+<div class="login-box" id="loginBox">
+  <h3>🔐 Manager Login</h3>
+  <input id="mid" placeholder="Manager ID">
+  <input id="mpass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard" style="display:none">
+
+  <button class="logout" onclick="logout()">Logout</button>
+
+  <h3>📦 Generate Bag QR</h3>
+  <input id="bagNo" placeholder="Enter Bag Number">
+  <button onclick="generateQR()">Generate QR</button>
+  <div id="qrBox"></div>
+
+  <h3 style="margin-top:25px;">📋 Laundry Requests</h3>
+  <div id="requests"></div>
+</div>
 
 <script>
+  /* LOGIN */
+  function login() {
+    const id = mid.value;
+    const pass = mpass.value;
+
+    if (id === "manager" && pass === "laundry123") {
+      sessionStorage.setItem("managerLogin", "true");
+      showDashboard();
+    } else {
+      alert("Invalid credentials ❌");
+    }
+  }
+
+  function logout() {
+    sessionStorage.clear();
+    location.reload();
+  }
+
+  function showDashboard() {
+    loginBox.style.display = "none";
+    dashboard.style.display = "block";
+    loadRequests();
+  }
+
+  if (sessionStorage.getItem("managerLogin")) {
+    showDashboard();
+  }
+
+  /* QR GENERATOR */
+  function generateQR() {
+    const bag = bagNo.value;
+    if (!bag) return alert("Enter bag number");
+
+    qrBox.innerHTML = "";
+    new QRCode(qrBox, {
+      text: bag,
+      width: 180,
+      height: 180
+    });
+  }
+
+  /* LOAD REQUESTS */
   function loadRequests() {
     const data = JSON.parse(localStorage.getItem("laundryData")) || [];
     const box = document.getElementById("requests");
     box.innerHTML = "";
 
     if (data.length === 0) {
-      box.innerHTML = "<p>No laundry requests yet.</p>";
+      box.innerHTML = "<p>No requests yet.</p>";
       return;
     }
 
     data.forEach(item => {
       const div = document.createElement("div");
-      div.className = "card " + (item.status === "Verified" ? "verified" : "pending");
+      div.className = "card " + (item.status === "Ready for Pickup" ? "ready" : "pending");
 
       div.innerHTML = `
         <p><b>Name:</b> ${item.name}</p>
@@ -66,24 +160,51 @@
         <p><b>Bag:</b> ${item.bag}</p>
         <p><b>Clothes:</b> ${item.clothes}</p>
         <p><b>Status:</b> ${item.status}</p>
-        ${item.status === "Pending" ? `<button onclick="verify(${item.id})">Verify</button>` : ""}
+
+        ${item.status === "Pending" ? `
+          <input type="date" id="date-${item.id}">
+          <select id="slot-${item.id}">
+            <option value="">Select Time Slot</option>
+            <option>10:00 – 11:00</option>
+            <option>11:00 – 12:00</option>
+            <option>14:00 – 15:00</option>
+            <option>15:00 – 16:00</option>
+          </select>
+          <button onclick="verify(${item.id})">Verify & Assign</button>
+        ` : `
+          <p><b>Pickup:</b> ${item.pickupDate || ""} (${item.pickupSlot || ""})</p>
+        `}
       `;
+
       box.appendChild(div);
     });
   }
 
+  /* VERIFY */
   function verify(id) {
     let data = JSON.parse(localStorage.getItem("laundryData"));
+
+    const date = document.getElementById(`date-${id}`).value;
+    const slot = document.getElementById(`slot-${id}`).value;
+
+    if (!date || !slot) {
+      alert("Select pickup date & time");
+      return;
+    }
+
     data = data.map(item => {
-      if (item.id === id) item.status = "Verified";
+      if (item.id === id) {
+        item.status = "Ready for Pickup";
+        item.pickupDate = date;
+        item.pickupSlot = slot;
+      }
       return item;
     });
+
     localStorage.setItem("laundryData", JSON.stringify(data));
     loadRequests();
-    alert("Laundry Verified ✅");
+    alert("Laundry verified & scheduled ✅");
   }
-
-  loadRequests();
 </script>
 
 </body>
