@@ -5,6 +5,8 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
+    <script src="script.js"></script>
+
     body {
       font-family: Arial, sans-serif;
       background: linear-gradient(120deg, #4facfe, #00f2fe);
@@ -128,30 +130,7 @@
     }
   }
 
-  function submitLaundry() {
-    const data = {
-      id: Date.now(),
-      name: name.value,
-      room: room.value,
-      address: address.value,
-      bag: bag.value,
-      clothes: clothes.value,
-      status: "Pending"
-    };
-
-    if (!data.name || !data.room || !data.address || !data.bag || !data.clothes) {
-      alert("Please fill all details ❌");
-      return;
-    }
-
-    let list = JSON.parse(localStorage.getItem("laundryData")) || [];
-    list.push(data);
-    localStorage.setItem("laundryData", JSON.stringify(list));
-
-    alert("Laundry Submitted Successfully 🧺✅");
-
-    name.value = room.value = address.value = clothes.value = "";
-  }
+  
 
   function checkStatus() {
     const bagNo = document.getElementById("bag").value;
