@@ -3,6 +3,7 @@
 <head>
   <title>Student Dashboard</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
+
   <style>
     body { font-family: Arial; background:#f4f6f9; }
     .menu button {
@@ -14,10 +15,7 @@
       background:white; padding:20px;
       margin-top:20px; border-radius:8px;
     }
-    #reader {
-      width:300px;
-      margin-top:15px;
-    }
+    #reader { width:300px; margin-top:15px; }
   </style>
 </head>
 <body>
@@ -26,10 +24,7 @@
 
 <div class="menu">
   <button onclick="startScan()">Scan QR</button>
-  <button>Uploaded</button>
-  <button>Details</button>
-  <button>Pick Up Time</button>
-  <button>History</button>
+  <button onclick="stopScan()">Close Scanner</button>
 </div>
 
 <div id="reader"></div>
@@ -40,28 +35,38 @@
   <input placeholder="Name"><br><br>
   <input placeholder="Room / Roll No"><br><br>
   <input placeholder="Address"><br><br>
-
-  <!-- QR VALUE GOES HERE -->
   <input id="bag" placeholder="Bag / Token Number"><br><br>
-
   <textarea placeholder="Clothes Details"></textarea><br><br>
+
   <button>Submit</button>
 </div>
 
 <script>
-  function startScan() {
-    const qr = new Html5Qrcode("reader");
+  let qrScanner = null;
 
-    qr.start(
-      { facingMode: "environment" },   // back camera
+  function startScan() {
+    if (qrScanner) return;
+
+    qrScanner = new Html5Qrcode("reader");
+    qrScanner.start(
+      { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       qrText => {
         document.getElementById("bag").value = qrText;
         alert("QR Scanned Successfully");
-        qr.stop();
-      },
-      error => {}
+        stopScan();
+      }
     );
+  }
+
+  function stopScan() {
+    if (qrScanner) {
+      qrScanner.stop().then(() => {
+        qrScanner.clear();
+        qrScanner = null;
+        document.getElementById("reader").innerHTML = "";
+      });
+    }
   }
 </script>
 
