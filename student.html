@@ -2,43 +2,67 @@
 <html>
 <head>
   <title>Student Dashboard</title>
-  <script src="script.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body { font-family: Arial; background:#f4f6f9; padding:20px; }
-    input, textarea {
-      width:100%; padding:8px; margin:5px 0;
+    body { font-family: Arial; background:#f4f6f9; }
+    .menu button {
+      margin:5px; padding:10px 15px;
+      background:#2c7be5; color:white;
+      border:none; border-radius:6px;
     }
-    button {
-      padding:10px; background:#2c7be5;
-      color:white; border:none; border-radius:5px;
-      cursor:pointer;
+    .box {
+      background:white; padding:20px;
+      margin-top:20px; border-radius:8px;
     }
-    .box { background:white; padding:20px; border-radius:8px; }
+    #reader {
+      width:300px;
+      margin-top:15px;
+    }
   </style>
 </head>
 <body>
 
 <h2>Student Dashboard</h2>
 
-<div class="box">
-  <h3>Upload Laundry</h3>
-  <input id="name" placeholder="Name">
-  <input id="room" placeholder="Room / Roll No">
-  <input id="address" placeholder="Address">
-  <input id="bag" placeholder="Bag / Token Number">
-  <textarea id="clothes" placeholder="Clothes Details"></textarea>
-  <button onclick="submitLaundry()">Submit</button>
+<div class="menu">
+  <button onclick="startScan()">Scan QR</button>
+  <button>Uploaded</button>
+  <button>Details</button>
+  <button>Pick Up Time</button>
+  <button>History</button>
 </div>
 
-<br>
+<div id="reader"></div>
 
 <div class="box">
-  <h3>Your Laundry Status</h3>
-  <div id="status"></div>
+  <h3>Upload Laundry Details</h3>
+
+  <input placeholder="Name"><br><br>
+  <input placeholder="Room / Roll No"><br><br>
+  <input placeholder="Address"><br><br>
+
+  <!-- QR VALUE GOES HERE -->
+  <input id="bag" placeholder="Bag / Token Number"><br><br>
+
+  <textarea placeholder="Clothes Details"></textarea><br><br>
+  <button>Submit</button>
 </div>
 
 <script>
-  showStudentStatus();
+  function startScan() {
+    const qr = new Html5Qrcode("reader");
+
+    qr.start(
+      { facingMode: "environment" },   // back camera
+      { fps: 10, qrbox: 250 },
+      qrText => {
+        document.getElementById("bag").value = qrText;
+        alert("QR Scanned Successfully");
+        qr.stop();
+      },
+      error => {}
+    );
+  }
 </script>
 
 </body>
