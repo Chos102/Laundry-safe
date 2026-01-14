@@ -1,44 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Student Dashboard</title>
+  <title>Student Laundry Dashboard</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
-    body { font-family: Arial; background:#f4f6f9; }
-    .menu button {
-      margin:5px; padding:10px 15px;
-      background:#2c7be5; color:white;
-      border:none; border-radius:6px;
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #4facfe, #00f2fe);
+      padding: 20px;
     }
-    .box {
-      background:white; padding:20px;
-      margin-top:20px; border-radius:8px;
+    h2 {
+      text-align: center;
+      color: white;
     }
-    #reader { width:300px; margin-top:15px; }
+    .card {
+      background: white;
+      max-width: 420px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    textarea {
+      resize: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    button:hover {
+      background: #218838;
+    }
+    #reader {
+      margin-top: 15px;
+      width: 100%;
+    }
+    .scan-btn {
+      background: #007bff;
+    }
+    .scan-btn:hover {
+      background: #0069d9;
+    }
   </style>
 </head>
 <body>
 
-<h2>Student Dashboard</h2>
+<h2>🧺 Student Laundry Dashboard</h2>
 
-<div class="menu">
-  <button onclick="startScan()">Scan QR</button>
-  <button onclick="stopScan()">Close Scanner</button>
-</div>
+<div class="card">
+  <button class="scan-btn" onclick="startScan()">📷 Scan Bag QR</button>
+  <div id="reader"></div>
 
-<div id="reader"></div>
+  <input id="name" placeholder="Student Name">
+  <input id="room" placeholder="Room / Roll No">
+  <input id="address" placeholder="Hostel / Address">
+  <input id="bag" placeholder="Bag Number" readonly>
+  <textarea id="clothes" rows="3" placeholder="Clothes Details"></textarea>
 
-<div class="box">
-  <h3>Upload Laundry Details</h3>
-
-  <input placeholder="Name"><br><br>
-  <input placeholder="Room / Roll No"><br><br>
-  <input placeholder="Address"><br><br>
-  <input id="bag" placeholder="Bag / Token Number"><br><br>
-  <textarea placeholder="Clothes Details"></textarea><br><br>
-
-  <button>Submit</button>
+  <button onclick="submitLaundry()">Submit Laundry</button>
 </div>
 
 <script>
@@ -46,15 +80,14 @@
 
   function startScan() {
     if (qrScanner) return;
-
     qrScanner = new Html5Qrcode("reader");
     qrScanner.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
+      { fps: 10, qrbox: 200 },
       qrText => {
         document.getElementById("bag").value = qrText;
-        alert("QR Scanned Successfully");
         stopScan();
+        alert("QR Scanned Successfully ✅");
       }
     );
   }
@@ -67,6 +100,31 @@
         document.getElementById("reader").innerHTML = "";
       });
     }
+  }
+
+  function submitLaundry() {
+    const data = {
+      id: Date.now(),
+      name: name.value,
+      room: room.value,
+      address: address.value,
+      bag: bag.value,
+      clothes: clothes.value,
+      status: "Pending"
+    };
+
+    if (!data.name || !data.room || !data.address || !data.bag || !data.clothes) {
+      alert("Please fill all details ❌");
+      return;
+    }
+
+    let list = JSON.parse(localStorage.getItem("laundryData")) || [];
+    list.push(data);
+    localStorage.setItem("laundryData", JSON.stringify(list));
+
+    alert("Laundry Submitted Successfully 🧺✅");
+
+    name.value = room.value = address.value = bag.value = clothes.value = "";
   }
 </script>
 
