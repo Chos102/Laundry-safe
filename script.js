@@ -8,18 +8,35 @@ function saveData(data) {
 
 /* STUDENT SUBMIT */
 function submitLaundry() {
-  const data = getData();
+  if (!bag.value) {
+    alert("Please scan the bag QR first ❌");
+    return;
+  }
 
-  const entry = {
+  if (!name.value || !room.value || !address.value || !clothes.value) {
+    alert("Please fill all details ❌");
+    return;
+  }
+
+  const data = {
     id: Date.now(),
     name: name.value,
     room: room.value,
     address: address.value,
     bag: bag.value,
     clothes: clothes.value,
-    status: "Pending Verification",
-    pickup: "-"
+    status: "Pending"
   };
+
+  let list = JSON.parse(localStorage.getItem("laundryData")) || [];
+  list.push(data);
+  localStorage.setItem("laundryData", JSON.stringify(list));
+
+  alert("Laundry Submitted Successfully 🧺✅");
+
+  name.value = room.value = address.value = clothes.value = "";
+}
+
 
   data.push(entry);
   saveData(data);
