@@ -8,22 +8,29 @@ function saveData(data) {
 
 /* STUDENT SUBMIT */
 function submitLaundry() {
-  const nameInput = document.getElementById("name");
-  const roomInput = document.getElementById("room");
-  const addressInput = document.getElementById("address");
-  const bagInput = document.getElementById("bag");
-  const clothesInput = document.getElementById("clothes");
+  const nameInput = document.querySelector("input[id='name']");
+  const roomInput = document.querySelector("input[id='room']");
+  const addressInput = document.querySelector("input[id='address']");
+  const bagInput = document.querySelector("input[id='bag']");
+  const clothesInput = document.querySelector("textarea[id='clothes']");
 
-  if (!bagInput.value) {
+  // DEBUG (do not remove until tested)
+  console.log("NAME:", nameInput?.value);
+  console.log("ROOM:", roomInput?.value);
+  console.log("ADDRESS:", addressInput?.value);
+  console.log("BAG:", bagInput?.value);
+  console.log("CLOTHES:", clothesInput?.value);
+
+  if (!bagInput || !bagInput.value.trim()) {
     alert("Please scan the bag QR first ❌");
     return;
   }
 
   if (
-    !nameInput.value ||
-    !roomInput.value ||
-    !addressInput.value ||
-    !clothesInput.value
+    !nameInput?.value.trim() ||
+    !roomInput?.value.trim() ||
+    !addressInput?.value.trim() ||
+    !clothesInput?.value.trim()
   ) {
     alert("Please fill all details ❌");
     return;
@@ -31,11 +38,11 @@ function submitLaundry() {
 
   const entry = {
     id: Date.now(),
-    name: nameInput.value,
-    room: roomInput.value,
-    address: addressInput.value,
-    bag: bagInput.value,
-    clothes: clothesInput.value,
+    name: nameInput.value.trim(),
+    room: roomInput.value.trim(),
+    address: addressInput.value.trim(),
+    bag: bagInput.value.trim(),
+    clothes: clothesInput.value.trim(),
     status: "Pending",
     pickup: ""
   };
@@ -46,12 +53,12 @@ function submitLaundry() {
 
   alert("Laundry Submitted Successfully 🧺✅");
 
-  nameInput.value =
-    roomInput.value =
-    addressInput.value =
-    clothesInput.value =
-      "";
+  nameInput.value = "";
+  roomInput.value = "";
+  addressInput.value = "";
+  clothesInput.value = "";
 }
+
 
 /* STUDENT STATUS */
 function showStudentStatus() {
