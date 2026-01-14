@@ -18,31 +18,24 @@ function submitLaundry() {
     return;
   }
 
-  const data = {
+  const entry = {
     id: Date.now(),
     name: name.value,
     room: room.value,
     address: address.value,
     bag: bag.value,
     clothes: clothes.value,
-    status: "Pending"
+    status: "Pending",
+    pickup: ""
   };
 
-  let list = JSON.parse(localStorage.getItem("laundryData")) || [];
-  list.push(data);
-  localStorage.setItem("laundryData", JSON.stringify(list));
+  const data = getData();
+  data.push(entry);
+  saveData(data);
 
   alert("Laundry Submitted Successfully 🧺✅");
 
   name.value = room.value = address.value = clothes.value = "";
-}
-
-
-  data.push(entry);
-  saveData(data);
-
-  alert("Laundry submitted successfully!");
-  location.reload();
 }
 
 /* STUDENT STATUS */
@@ -54,10 +47,11 @@ function showStudentStatus() {
     html += `
       <p><b>Bag ${d.bag}</b><br>
       Status: ${d.status}<br>
-      Pickup: ${d.pickup}</p><hr>`;
+      Pickup: ${d.pickup || "Not assigned yet"}</p><hr>`;
   });
 
-  document.getElementById("status").innerHTML = html || "No uploads yet.";
+  document.getElementById("status").innerHTML =
+    html || "No uploads yet.";
 }
 
 /* MANAGER VIEW */
@@ -84,8 +78,13 @@ function loadManagerView() {
 /* MANAGER VERIFY */
 function verify(index) {
   const data = getData();
-  const date = document.getElementById("date"+index).value;
-  const time = document.getElementById("time"+index).value;
+  const date = document.getElementById("date" + index).value;
+  const time = document.getElementById("time" + index).value;
+
+  if (!date || !time) {
+    alert("Please select date and time ❌");
+    return;
+  }
 
   data[index].status = "Ready for Pickup";
   data[index].pickup = `${date} ${time}`;
